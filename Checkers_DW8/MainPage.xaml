@@ -10,7 +10,7 @@
     SupportedOrientations="Portrait" Orientation="Portrait"
     shell:SystemTray.IsVisible="True">
 	<phone:PhoneApplicationPage.Resources>
-		<ImageBrush x:Key="boardBrush" ImageSource="tileBrush.png"/>
+		<ImageBrush x:Key="boardBrush" ImageSource="tileBrush.png"/>        
 	</phone:PhoneApplicationPage.Resources>
     
     <Grid x:Name="LayoutRoot">
@@ -23,7 +23,7 @@
         <StackPanel x:Name="TitlePanel" Margin="12,17,0,28">
             <TextBlock x:Name="ApplicationTitle" Text="T-Ecosystems" Style="{StaticResource PhoneTextNormalStyle}"/>
             <TextBlock x:Name="PageTitle" Text="Checkers" Margin="9,-7,0,0" Style="{StaticResource PhoneTextTitle1Style}"/>                    
-            <Grid x:Name="Board" Margin="12 0 24 0">
+            <Grid x:Name="Board" Margin="12 0 24 0" ShowGridLines="True">
                 <Grid.Resources>                    
                     <Style TargetType="Ellipse">
                         <Setter Property="Width" Value="40"/>
@@ -31,21 +31,26 @@
                         
                     </Style>
                     <Style x:Name="bgBlack" TargetType="Ellipse">
-                        <Setter Property="Fill" Value="Red" />
                         <Setter Property="Margin" Value="7 7 7 7" />
+                        <Setter Property="Fill">
+                            <Setter.Value>
+                                <ImageBrush ImageSource="pieceBlack.png" />
+                            </Setter.Value>
+                        </Setter>                        
                     </Style>
                     <Style x:Name="bgWhite" TargetType="Ellipse">
-                        <Setter Property="Fill" Value="Goldenrod" />
                         <Setter Property="Margin" Value="7 7 7 7" />
+                        <Setter Property="Fill">
+                            <Setter.Value>
+                                <ImageBrush ImageSource="pieceWhite.png" />
+                            </Setter.Value>
+                        </Setter>                        
                     </Style>
                     <Style x:Name="bgBlackQueen" TargetType="Ellipse">
                         <Setter Property="Margin" Value="7 7 7 7" />
                         <Setter Property="Fill">
                             <Setter.Value>
-                                <RadialGradientBrush>
-                                    <GradientStop Color="Black" />
-                                    <GradientStop Color="Red" Offset="0.7"/>                                    
-                                </RadialGradientBrush>
+                                <ImageBrush ImageSource="blackCrown.png" />
                             </Setter.Value>
                         </Setter>
                     </Style>
@@ -53,14 +58,19 @@
                         <Setter Property="Margin" Value="7 7 7 7" />
                         <Setter Property="Fill">
                             <Setter.Value>
-                                <RadialGradientBrush>                                    
-                                    <GradientStop Color="Yellow"/>
-                                    <GradientStop Color="Goldenrod" Offset="0.7"/>
-                                </RadialGradientBrush>
+                                <ImageBrush ImageSource="whiteCrown.png" />
                             </Setter.Value>
                         </Setter>
-                    </Style>                    
-                </Grid.Resources>                
+                    </Style>
+                    <Style x:Name="bgNone" TargetType="Ellipse">
+                        <Setter Property="Margin" Value="7 7 7 7" />
+                        <Setter Property="Fill">
+                            <Setter.Value>
+                                <ImageBrush ImageSource="pieceEmpty.png" />
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </Grid.Resources>                                  
                 <Grid.Background>
             		<StaticResource ResourceKey="boardBrush"/>
             	</Grid.Background>                
@@ -84,6 +94,7 @@
                     <ColumnDefinition Width="54"/>
                     <ColumnDefinition Width="54"/>
                 </Grid.ColumnDefinitions>
+                
                 
                 <Ellipse x:Name="r1" Grid.Column="1" Grid.Row="0"                         
                          Style="{StaticResource bgBlack}"

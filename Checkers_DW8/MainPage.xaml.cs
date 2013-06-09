@@ -12,6 +12,7 @@ using System.Windows.Shapes;
 using System.Windows.Markup;
 using System.Text;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 namespace Checkers_DW8
 {
@@ -21,6 +22,7 @@ namespace Checkers_DW8
         public Ellipse ellipse { get; set; }
         public bool canMove { get; set; }
         public bool turn { get; set; }
+        
         // Constructor
         public MainPage()
         {
@@ -33,7 +35,7 @@ namespace Checkers_DW8
             boardPieces = new List<Pieces>();            
             LoadBoardPieces();
             this.canMove = false;
-            this.turn = true;
+            this.turn = false;
         }
 
         private void LoadBoardPieces()
@@ -56,8 +58,37 @@ namespace Checkers_DW8
         }
 
         private void Start_Click(object sender, RoutedEventArgs e)
-        {
-            //No se como reiniciar la aplicacion
+        {            
+            //Reinicio la Lista que contene las piezas
+            LoadBoardPieces();            
+            foreach (var item in Board.Children)
+            {
+                // Solo nos interesan los objetos tipo Ellipse
+                if (item.GetType() == typeof(Ellipse))
+                {
+                    Ellipse eli = item as Ellipse;
+                    Pieces p = (from b in boardPieces
+                                where b.Name.Equals(eli.Name)
+                             select b).Single();
+                    RowColl rc = new RowColl(p.Position);                    
+                    eli.SetValue(Grid.ColumnProperty, rc.col);
+                    eli.SetValue(Grid.RowProperty, rc.row);
+                    ImageBrush ib = new ImageBrush();
+                    if(p.Color == ColorPeace.black)
+                    {
+                        ib.ImageSource = new BitmapImage(new Uri(@"pieceBlack.png", UriKind.Relative));
+                    }        
+                    else
+                    {
+                        ib.ImageSource = new BitmapImage(new Uri(@"pieceWhite.png", UriKind.Relative));
+                    }
+                    eli.Fill = ib;
+                }
+            }
+            Board.UpdateLayout();
+            boardPieces.ForEach(p => p.IsActive = true);
+            this.canMove = false;
+            this.turn = false;
         }
 
         private void Exit_Click(object sender, RoutedEventArgs e)
@@ -114,128 +145,171 @@ namespace Checkers_DW8
         private void Ellipse_ManipulationCompleted(object sender, System.Windows.Input.ManipulationCompletedEventArgs e)
         {
             if (this.canMove)
-            {
+            {                
                 Pieces p = (from b in boardPieces
                             where b.Name.Equals(this.ellipse.GetValue(NameProperty))
-                            select b).Single();
-                int pos = p.Position;
+                            select b).Single();                
 
-                RowColl rc = new RowColl(p.Position);
-
-                double c = 0;
-                double r = 0;
-
+                RowColl initialPosition = new RowColl(p.Position);
+                RowColl finalPosition = new RowColl(p.Position);                                                
+                
                 CompositeTransform cp = this.ellipse.RenderTransform as CompositeTransform;
 
                 #region Set_Move
                 if (p.Color == ColorPeace.black)
-                {
-                    if (((0 < e.TotalManipulation.Translation.Y && e.TotalManipulation.Translation.Y < 67.5) && (-67.5 < e.TotalManipulation.Translation.X && e.TotalManipulation.Translation.X < 67.5)))
-                    {
-                        if (e.TotalManipulation.Translation.Y > 40.5 && e.TotalManipulation.Translation.X > 40.5)
+                {                    
+                    if (e.TotalManipulation.Translation.Y > 0)
+                    {                        
+                        //Evaluamos si debemos sumar o restar una columna
+                        if (e.TotalManipulation.Translation.X > 0)
                         {
-                            c = 54;
-                            r = 54;
-                            pos = pos + 9;
+                            if (e.TotalManipulation.Translation.Y > 40.5 && e.TotalManipulation.Translation.X > 40.5)
+                            {
+                                finalPosition.col = initialPosition.col + 1;
+                                finalPosition.row = initialPosition.row + 1;
+                            }                            
                         }
-                        if (e.TotalManipulation.Translation.Y > 40.5 && e.TotalManipulation.Translation.X < -40.5)
+                        else
                         {
-                            c = -54;
-                            r = 54;
-                            pos = pos + 7;
+                            if (e.TotalManipulation.Translation.Y > 40.5 && e.TotalManipulation.Translation.X < -40.5)
+                            {
+                                finalPosition.col = initialPosition.col - 1;
+                                finalPosition.row = initialPosition.row + 1;
+                            }   
                         }
+
                     }
                 }
                 else
                 {
-                    if (((-67.5 < e.TotalManipulation.Translation.Y && e.TotalManipulation.Translation.Y < 0) && (-67.5 < e.TotalManipulation.Translation.X && e.TotalManipulation.Translation.X < 67.5)))
-                    {
-                        if (e.TotalManipulation.Translation.Y < -40.5 && e.TotalManipulation.Translation.X > 40.5)
+                    if (e.TotalManipulation.Translation.Y < 0)
+                    {                        
+                        //Evaluamos si debemos sumar o restar una columna
+                        if (e.TotalManipulation.Translation.X > 0)
                         {
-                            c = 54;
-                            r = -54;
-                            pos = pos - 7;
+                            if (e.TotalManipulation.Translation.Y < -40.5 && e.TotalManipulation.Translation.X > 40.5)
+                            {
+                                finalPosition.col = initialPosition.col + 1;
+                                finalPosition.row = initialPosition.row - 1;
+                            }
                         }
-                        if (e.TotalManipulation.Translation.Y < -40.5 && e.TotalManipulation.Translation.X < -40.5)
+                        else
                         {
-                            c = -54;
-                            r = -54;
-                            pos = pos - 9;
+                            if (e.TotalManipulation.Translation.Y < -40.5 && e.TotalManipulation.Translation.X < -40.5)
+                            {
+                                finalPosition.col = initialPosition.col - 1;
+                                finalPosition.row = initialPosition.row - 1;
+                            }
                         }
+
                     }
                 }
                 #endregion
 
                 #region Movement
-                if (PlayMove.IsEmptyPlace(pos, boardPieces))
+                if (PlayMove.IsEmptyPlace(finalPosition.GetPosition(), boardPieces))
                 {
-                    cp.TranslateX += c - e.TotalManipulation.Translation.X;
-                    cp.TranslateY += r - e.TotalManipulation.Translation.Y;
-                    (boardPieces.Where(piece => piece.Name.Equals(this.ellipse.GetValue(NameProperty))).ToList<Pieces>()).ForEach(pi => pi.Position = pos);
+                    cp.TranslateX -= e.TotalManipulation.Translation.X;
+                    cp.TranslateY -= e.TotalManipulation.Translation.Y;
+                    this.ellipse.SetValue(Grid.ColumnProperty, finalPosition.col);
+                    this.ellipse.SetValue(Grid.RowProperty, finalPosition.row);
+                    (boardPieces.Where(piece => piece.Name.Equals(this.ellipse.GetValue(NameProperty))).ToList<Pieces>()).ForEach(pi => pi.Position = finalPosition.GetPosition());
                     this.turn = !this.turn;
                 }
                 else
                 {
-                    if (PlayMove.TakePiece(pos, p, boardPieces))
-                    {
-                        int takePiece = pos;
+                    if (PlayMove.TakePiece(finalPosition.GetPosition(), p, boardPieces))
+                    {   
+                        Pieces tp = (from t in boardPieces where t.Position.Equals(finalPosition.GetPosition()) select t).Single();
+                        bool takedPiece = false;
+
                         #region Take_Piece
                         if (p.Color == ColorPeace.black)
                         {
-                            if (((0 < e.TotalManipulation.Translation.Y && e.TotalManipulation.Translation.Y < 94.5) && (-94.5 < e.TotalManipulation.Translation.X && e.TotalManipulation.Translation.X < 94.5)))
+                            if (e.TotalManipulation.Translation.Y > 0)
                             {
-                                if (e.TotalManipulation.Translation.Y > 40.5 && e.TotalManipulation.Translation.X > 40.5)
+                                //Evaluamos si debemos sumar o restar una columna
+                                if (e.TotalManipulation.Translation.X > 0)
                                 {
-                                    c += 54;
-                                    r += 54;
-                                    pos = pos + 9;
+                                    if (e.TotalManipulation.Translation.Y > 94.5 && e.TotalManipulation.Translation.X > 94.5)
+                                    {
+                                        finalPosition.col = initialPosition.col + 2;
+                                        finalPosition.row = initialPosition.row + 2;
+                                        takedPiece = true;
+                                    }
                                 }
-                                if (e.TotalManipulation.Translation.Y > 40.5 && e.TotalManipulation.Translation.X < -40.5)
+                                else
                                 {
-                                    c += -54;
-                                    r += 54;
-                                    pos = pos + 7;
+                                    if (e.TotalManipulation.Translation.Y > 94.5 && e.TotalManipulation.Translation.X < -94.5)
+                                    {
+                                        finalPosition.col = initialPosition.col - 2;
+                                        finalPosition.row = initialPosition.row + 2;
+                                        takedPiece = true;
+                                    }
                                 }
+
                             }
                         }
                         else
                         {
-                            if (((-94.5 < e.TotalManipulation.Translation.Y && e.TotalManipulation.Translation.Y < 0) && (-94.5 < e.TotalManipulation.Translation.X && e.TotalManipulation.Translation.X < 94.5)))
-                            {
-                                if (e.TotalManipulation.Translation.Y < -40.5 && e.TotalManipulation.Translation.X > 40.5)
+                            if (e.TotalManipulation.Translation.Y < 0)
+                            {                                
+                                //Evaluamos si debemos sumar o restar una columna
+                                if (e.TotalManipulation.Translation.X > 0)
                                 {
-                                    c += 54;
-                                    r += -54;
-                                    pos = pos - 7;
+                                    if (e.TotalManipulation.Translation.Y < -94.5 && e.TotalManipulation.Translation.X > 94.5)
+                                    {
+                                        finalPosition.col = initialPosition.col + 2;
+                                        finalPosition.row = initialPosition.row - 2;
+                                        takedPiece = true;
+                                    }
                                 }
-                                if (e.TotalManipulation.Translation.Y < -40.5 && e.TotalManipulation.Translation.X < -40.5)
+                                else
                                 {
-                                    c += -54;
-                                    r += -54;
-                                    pos = pos - 9;
+                                    if (e.TotalManipulation.Translation.Y < -94.5 && e.TotalManipulation.Translation.X < -94.5)
+                                    {
+                                        finalPosition.col = initialPosition.col - 2;
+                                        finalPosition.row = initialPosition.row - 2;
+                                        takedPiece = true;
+                                    }
                                 }
+
                             }
-                        }
+                        }                        
                         #endregion
-                        Pieces tp = (from t in boardPieces where t.Position.Equals(takePiece) select t).Single();
-                        foreach (var item in Board.Children)
-                        {
-                            // Solo nos interesan los objetos tipo Ellipse
-                            if (item.GetType() == typeof(Ellipse))
+
+                        if (takedPiece)
+                        {                                             
+                            foreach (var item in Board.Children)
                             {
-                                Ellipse ellipse = item as Ellipse;
-                                if (ellipse.GetValue(NameProperty).ToString() == tp.Name)
+                                // Solo nos interesan los objetos tipo Ellipse
+                                if (item.GetType() == typeof(Ellipse))
                                 {
-                                    Board.Children.Remove(ellipse);
-                                    boardPieces.Remove(tp);
-                                    break;
+                                    Ellipse eli = item as Ellipse;
+                                    if (eli.GetValue(NameProperty).ToString() == tp.Name)
+                                    {
+                                        ImageBrush hib = new ImageBrush();
+                                        hib.ImageSource = new BitmapImage(new Uri(@"pieceEmpty.png", UriKind.Relative));
+                                        eli.Fill = hib;
+                                        eli.SetValue(Grid.ColumnProperty, 0);
+                                        eli.SetValue(Grid.RowProperty, 0);
+                                        boardPieces.Where(pc => pc.Name.Equals(tp.Name)).ToList().ForEach(ph => ph.IsActive = false);
+                                        break;
+                                    }
                                 }
                             }
+                            cp.TranslateX -= e.TotalManipulation.Translation.X;
+                            cp.TranslateY -= e.TotalManipulation.Translation.Y;
+                            this.ellipse.SetValue(Grid.ColumnProperty, finalPosition.col);
+                            this.ellipse.SetValue(Grid.RowProperty, finalPosition.row);
+                            boardPieces.Where(pc=>pc.Name.Equals(this.ellipse.Name)).ToList().ForEach(ph => ph.Position = finalPosition.GetPosition());
+                            this.turn = !this.turn;
                         }
-                        cp.TranslateX += c - e.TotalManipulation.Translation.X;
-                        cp.TranslateY += r - e.TotalManipulation.Translation.Y;
-                        (boardPieces.Where(piece => piece.Name.Equals(this.ellipse.GetValue(NameProperty))).ToList<Pieces>()).ForEach(pi => pi.Position = pos);
-                        this.turn = !this.turn;
+                        else
+                        {
+                            cp.TranslateX -= e.TotalManipulation.Translation.X;
+                            cp.TranslateY -= e.TotalManipulation.Translation.Y;
+                        }
                     }
                     else
                     {
@@ -245,23 +319,25 @@ namespace Checkers_DW8
                 }
                 #endregion
 
-                if (PlayMove.IsCrow(pos, p.Color))
+                if (PlayMove.IsCrow(finalPosition.GetPosition(), p.Color))
                 {
-                    (boardPieces.Where(piece => piece.Name.Equals(this.ellipse.GetValue(NameProperty))).ToList<Pieces>()).ForEach(pi => pi.IsQueen = true);
+                    ImageBrush qib = new ImageBrush();
+                    boardPieces.Where(pc=>pc.Name.Equals(this.ellipse.Name)).ToList<Pieces>().ForEach(pi => pi.IsQueen = true);
                     if (p.Color == ColorPeace.black)
                     {
-                        this.ellipse.Style = bgBlackQueen as Style;
+                        qib.ImageSource = new BitmapImage(new Uri(@"blackCrown.png", UriKind.Relative));
                     }
                     else
                     {
-                        this.ellipse.Style = bgWhiteQueen as Style;
+                        qib.ImageSource = new BitmapImage(new Uri(@"whiteCrown.png", UriKind.Relative));
                     }
-                }
+                    this.ellipse.Fill = qib;
+                }                
             }
-                
+            
             this.txt.Text = string.Format("Blancas {0} vs Negras {1}",
                 boardPieces.Where(p => p.Color == ColorPeace.white).ToList().Count.ToString(),
-                boardPieces.Where(p => p.Color == ColorPeace.black).ToList().Count.ToString());
+                boardPieces.Where(p => p.Color == ColorPeace.black).ToList().Count.ToString());            
         }
         
     }

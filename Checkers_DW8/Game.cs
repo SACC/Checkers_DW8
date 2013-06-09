@@ -8,13 +8,18 @@ namespace Checkers_DW8
 {
     public class RowColl
     {
-        public int row { get; set; }
-        public int col { get; set; }
+        public Int32 row { get; set; }
+        public Int32 col { get; set; }
 
         public RowColl(int p)
         {
             col = p % 8;
             row = p / 8;
+        }
+
+        public int GetPosition()
+        {
+            return (row * 8) + col;
         }
     }
 
@@ -24,6 +29,7 @@ namespace Checkers_DW8
         public int Position { get; set; }
         public ColorPeace Color { get; set; }
         public bool IsQueen { get; set; }
+        public bool IsActive { get; set; }        
 
         public Pieces(string n, int p, ColorPeace c, bool q)
         {
@@ -31,6 +37,7 @@ namespace Checkers_DW8
             this.Position = p;
             this.Color = c;
             this.IsQueen = q;
+            this.IsActive = true;
         }
     }
 
@@ -44,6 +51,8 @@ namespace Checkers_DW8
     {                        
         public static bool CanMove(Pieces p, List<Pieces> boardPieces)
         {
+            if (!p.IsActive)
+                return false;
             bool res = false;
             Pieces pc = null;
             RowColl rc = new RowColl(p.Position);
@@ -209,12 +218,12 @@ namespace Checkers_DW8
             }
             
             return res;
-        }
+        }        
 
         public static bool IsEmptyPlace(int p, List<Pieces> boardPieces)
         {
             return null == (from b in boardPieces where b.Position.Equals(p) select b).SingleOrDefault();         
-        }
+        }        
 
         public static bool TakePiece(int p, Pieces ps, List<Pieces> boardPieces)
         {
@@ -261,6 +270,6 @@ namespace Checkers_DW8
                 res = rc.row == 0;
             }
             return res;
-        }
+        }        
     }
 }
