@@ -66,7 +66,7 @@ namespace Checkers_DW8
                         case 0:
                             rc.col++;
                             pc = (from pos in boardPieces
-                                  where pos.Position.Equals(rc.col + ((rc.row + 1) * 8))
+                                  where pos.Position.Equals(rc.col + ((rc.row + 1) * 8)) && pos.IsActive
                                   select pos).FirstOrDefault();
                             if (pc != null)
                             {                                
@@ -84,7 +84,7 @@ namespace Checkers_DW8
                         case 7:
                             rc.col--;
                             pc = (from pos in boardPieces
-                                  where pos.Position.Equals(rc.col + ((rc.row + 1) * 8))
+                                  where pos.Position.Equals(rc.col + ((rc.row + 1) * 8)) && pos.IsActive
                                   select pos).FirstOrDefault();                             
                             if (pc != null)
                             {                                
@@ -101,8 +101,8 @@ namespace Checkers_DW8
                             break;
                         default:
                             pc = (from pos in boardPieces
-                                           where pos.Position.Equals((rc.col + 1) + ((rc.row + 1) * 8))
-                                           select pos).FirstOrDefault();
+                                  where pos.Position.Equals((rc.col + 1) + ((rc.row + 1) * 8)) && pos.IsActive
+                                  select pos).FirstOrDefault();
                             if (pc != null)
                             {
                                 res = false;
@@ -117,7 +117,7 @@ namespace Checkers_DW8
                             }
                             if (res) break;
                             pc = (from pos in boardPieces
-                                  where pos.Position.Equals((rc.col - 1) + ((rc.row + 1) * 8))
+                                  where pos.Position.Equals((rc.col - 1) + ((rc.row + 1) * 8)) && pos.IsActive
                                   select pos).FirstOrDefault();
                             if (pc != null)
                             {
@@ -146,7 +146,7 @@ namespace Checkers_DW8
                         case 0:
                             rc.col++;
                             pc = (from pos in boardPieces
-                                  where pos.Position.Equals(rc.col + ((rc.row - 1) * 8))
+                                  where pos.Position.Equals(rc.col + ((rc.row - 1) * 8)) && pos.IsActive
                                   select pos).FirstOrDefault();
                             if (pc != null)
                             {
@@ -164,7 +164,7 @@ namespace Checkers_DW8
                         case 7:
                             rc.col--;
                             pc = (from pos in boardPieces
-                                  where pos.Position.Equals(rc.col + ((rc.row - 1) * 8))
+                                  where pos.Position.Equals(rc.col + ((rc.row - 1) * 8)) && pos.IsActive
                                   select pos).FirstOrDefault();
                             if (pc != null)
                             {
@@ -181,7 +181,7 @@ namespace Checkers_DW8
                             break;
                         default:
                             pc = (from pos in boardPieces
-                                  where pos.Position.Equals((rc.col + 1) + ((rc.row - 1) * 8))
+                                  where pos.Position.Equals((rc.col + 1) + ((rc.row - 1) * 8)) && pos.IsActive
                                   select pos).FirstOrDefault();
                             if (pc != null)
                             {
@@ -197,7 +197,7 @@ namespace Checkers_DW8
                             }
                             if (res) break;
                             pc = (from pos in boardPieces
-                                  where pos.Position.Equals((rc.col - 1) + ((rc.row - 1) * 8))
+                                  where pos.Position.Equals((rc.col - 1) + ((rc.row - 1) * 8)) && pos.IsActive
                                   select pos).FirstOrDefault();
                             if (pc != null)
                             {
@@ -222,14 +222,14 @@ namespace Checkers_DW8
 
         public static bool IsEmptyPlace(int p, List<Pieces> boardPieces)
         {
-            return null == (from b in boardPieces where b.Position.Equals(p) select b).SingleOrDefault();         
+            return null == (from b in boardPieces where b.Position.Equals(p) && b.IsActive select b).SingleOrDefault();         
         }        
 
         public static bool TakePiece(int p, Pieces ps, List<Pieces> boardPieces)
         {
             bool res = false;
 
-            Pieces pt = (from b in boardPieces where b.Position.Equals(p) select b).SingleOrDefault();
+            Pieces pt = (from b in boardPieces where b.Position.Equals(p) && b.IsActive select b).SingleOrDefault();
 
             if (pt.Color != ps.Color)
             {

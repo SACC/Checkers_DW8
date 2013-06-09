@@ -315,9 +315,9 @@
                 </Ellipse>
                 
             </Grid>            
-            <Button x:Name="Start" Content="Iniciar" Click="Start_Click" />
+            <Button x:Name="Start" Content="Nuevo Juego" Click="Start_Click" />
             <Button x:Name="Exit" Content="Salir" Click="Exit_Click" />
-            <TextBlock x:Name="txt"></TextBlock>
+            <TextBlock x:Name="txt" HorizontalAlignment="Center"></TextBlock>
         </StackPanel>
     </Grid>
 

@@ -35,7 +35,7 @@ namespace Checkers_DW8
             boardPieces = new List<Pieces>();            
             LoadBoardPieces();
             this.canMove = false;
-            this.turn = false;
+            this.turn = true;
         }
 
         private void LoadBoardPieces()
@@ -334,10 +334,20 @@ namespace Checkers_DW8
                     this.ellipse.Fill = qib;
                 }                
             }
-            
+
             this.txt.Text = string.Format("Blancas {0} vs Negras {1}",
-                boardPieces.Where(p => p.Color == ColorPeace.white).ToList().Count.ToString(),
-                boardPieces.Where(p => p.Color == ColorPeace.black).ToList().Count.ToString());            
+                boardPieces.Where(p => p.Color == ColorPeace.white && p.IsActive).ToList().Count.ToString(),
+                boardPieces.Where(p => p.Color == ColorPeace.black && p.IsActive).ToList().Count.ToString());            
+
+            if (boardPieces.Where(p => p.Color == ColorPeace.white && p.IsActive).ToList().Count == 0)
+            {
+                this.txt.Text = "Ganan las Rojas";
+            }
+            if (boardPieces.Where(p => p.Color == ColorPeace.black && p.IsActive).ToList().Count == 0)
+            {
+                this.txt.Text = "Ganan las Amarillas";                
+            }
+            
         }
         
     }
