@@ -220,7 +220,7 @@ namespace Checkers_DW8
                 {
                     if (PlayMove.TakePiece(finalPosition.GetPosition(), p, boardPieces))
                     {   
-                        Pieces tp = (from t in boardPieces where t.Position.Equals(finalPosition.GetPosition()) select t).Single();
+                        Pieces tp = (from t in boardPieces where t.Position.Equals(finalPosition.GetPosition()) && t.IsActive select t).Single();
                         bool takedPiece = false;
 
                         #region Take_Piece
