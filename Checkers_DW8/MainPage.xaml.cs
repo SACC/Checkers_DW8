@@ -35,7 +35,7 @@ namespace Checkers_DW8
             boardPieces = new List<Pieces>();            
             LoadBoardPieces();
             this.canMove = false;
-            this.turn = true;
+            this.turn = false;
         }
 
         private void LoadBoardPieces()
@@ -87,6 +87,8 @@ namespace Checkers_DW8
             }
             Board.UpdateLayout();
             boardPieces.ForEach(p => p.IsActive = true);
+            this.txt.Text = "";
+            this.txt1.Text = "";
             this.canMove = false;
             this.turn = false;
         }
@@ -332,6 +334,9 @@ namespace Checkers_DW8
                         qib.ImageSource = new BitmapImage(new Uri(@"whiteCrown.png", UriKind.Relative));
                     }
                     this.ellipse.Fill = qib;
+                    this.txt1.Text = string.Format("Damas Blancas {0} vs Damas Negras {1}",
+                        boardPieces.Where(pc => pc.Color == ColorPeace.white && pc.IsActive && pc.IsQueen).ToList().Count.ToString(),
+                        boardPieces.Where(pc => pc.Color == ColorPeace.black && pc.IsActive && pc.IsQueen).ToList().Count.ToString());
                 }                
             }
 
